@@ -34,7 +34,6 @@ const parseCSV = (location, type, fieldsLength) => {
         }
         csv.parseFile(location, { delimiter })
         .validate(data => {
-          console.log(data.length, length, data, delimiter)
           if(data.length !== length){
             return false
           }

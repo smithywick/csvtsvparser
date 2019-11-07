@@ -26,7 +26,6 @@ const parseCSV = (location, type, fieldsLength) => {
         const lowerCaseType = type.toLowerCase()
         const delimiter = lowerCaseType === 'csv' ? ',' : lowerCaseType === 'tsv' ? '\t' : 'error'
         const fieldsCount = parseInt(fieldsLength)
-        
 
         if(!fs.existsSync(location)){
           reject(`The file location "${location}" does not contain a file. Canceling process.`)

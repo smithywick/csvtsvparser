@@ -10,4 +10,4 @@ Three question will be prompted in the console
 * 'Is the file format CSV (comma-separated values) or TSV (tab-separated values)?' (includes validation if the input isn't csv or tsv)
 * 'How many fields should each record contain?' (has validation to ensure integer)
 
-ToDo: TSV doesn't parse, more error handlng, header's aren't removed
+ToDo: TSV doesn't parse

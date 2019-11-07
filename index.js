@@ -2,6 +2,7 @@
 
 const readline = require('readline')
 const path = require('path')
+const fs = require('fs')
 const csv = require('fast-csv')
 
 const readlineInterface = readline.createInterface({
@@ -21,30 +22,40 @@ const parseCSV = (location, type, fieldsLength) => {
     return new Promise((resolve, reject) => {
         let goodRecords = []
         let badRecords = []
+        let header = true
         const lowerCaseType = type.toLowerCase()
-        
         const delimiter = lowerCaseType === 'csv' ? ',' : lowerCaseType === 'tsv' ? '\t' : 'error'
-        const length = parseInt(fieldsLength)
-        if(delimiter === 'error'){
-          reject(`${delimiter} is not a csv or tsv. Canceling process.`)
-        }
+        const fieldsCount = parseInt(fieldsLength)
         
-        if(isNaN(length)){
+
+        if(!fs.existsSync(location)){
+          reject(`The file location "${location}" does not contain a file. Canceling process.`)
+        }
+        if(delimiter === 'error'){
+          reject(`${delimiter} is not a csv or tsv file. Canceling process.`)
+        }
+        if(delimiter === '\t'){
+          reject('tsv files are currently not supported. Canceling process.')
+        }
+        if(isNaN(fieldsCount)){
           reject('You must input a integer for the fields count. Canceling process.')
         }
         csv.parseFile(location, { delimiter })
-        .validate(data => {
-          if(data.length !== length){
-            return false
-          }
-          return true
-         })
-        .on('error', error => {
-          reject(error)
-        })
-        .on('data', row => goodRecords.push(row))
-        .on('data-invalid', row => badRecords.push(row))
-        .on('end', () => resolve([goodRecords, badRecords]))
+          .on('data', row => {
+            if(header){
+              header = false
+              return
+            }
+            if(row.length !== fieldsCount){
+              badRecords.push(row)
+              return
+            }
+            goodRecords.push(row) 
+          })
+          .on('error', error => {
+            reject(error)
+          })
+          .on('end', () => resolve([goodRecords, badRecords]))
     })
 }
 
@@ -55,9 +66,9 @@ const exportFile = (data, fileName) => {
 }
 
 const main = async () => {
-    const location = await question('Where is this file located?')
-    const type = await question('Is the file format CSV (comma-separated values) or TSV (tab-separated values)?')
-    const fields = await question('How many fields should each record contain?')
+    const location = await question('Where is this file located? ')
+    const type = await question('Is the file format CSV (comma-separated values) or TSV (tab-separated values)? ')
+    const fields = await question('How many fields should each record contain? ')
     readlineInterface.close()
 
     try {
